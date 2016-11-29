@@ -1,0 +1,69 @@
+<template>
+  <require from="./search-form.css"></require>
+  <form submit.trigger="submit()">
+    <fieldset class="fieldset">
+      <div class="row">
+        <div class="small-3 columns">
+          <label for="google-api-key" class="text-right middle">Google API Key</label>
+        </div>
+        <div class="small-9 columns">
+          <input type="text" id="google-api-key" placeholder="aBc123EfG" value.bind="googleAPIKey">
+        </div>
+      </div>
+      <div class="row">
+        <div class="small-3 columns">
+          <label for="keyword" class="text-right middle">Keyword</label>
+        </div>
+        <div class="small-9 columns">
+          <input type="text" id="keyword" placeholder="i.e., capoeira" value.bind="keyword">
+        </div>
+      </div>
+      <div class="row">
+        <div class="small-9 columns float-right">
+          <input type="submit" class="button" value="Search">
+        </div>
+      </div>
+    </fieldset>
+  </form>
+  <loading-indicator loading.bind="isRequesting"></loading-indicator>
+  <div id="search-results">
+    <div class.bind="searchResults.length ? 'hide' : ''" class="text-center">Ready to search ${searchResultsCityLimit} cities</div>
+    <div class.bind="searchResults.length ? '' : 'hide'" class="text-center">
+      <p>Found ${searchResultsCount} places in ${searchResults.length} cities</p>
+      <button type="button" id="download" class="success button small" click.trigger="download()">Download Results</button>
+      <a id="download-anchor" style="display:none"></a>
+    </div>
+    <div repeat.for="c of searchResults">
+      <hr>
+      <h4>${c.city_name} [${c.result.results.length}] <small>population ${c.city_population} (2013) &mdash; serving ${c.people_per_result} people per result</small></h4>
+      <table class="hover">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Address</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr repeat.for="r of c.result.results" id="place-${r.place_id}">
+            <td>
+              ${r.name}
+              <p if.bind="hasPossibleDuplicates($parent.$index, r.place_id)">
+                <small>
+                  similar:
+                  <ul>
+                    <li repeat.for="p of getPossibleDuplicates($parent.$index, r.place_id)">
+                      <a href="#place-${r.place_id}">${p.place2}</a>
+                    </li>
+                  </ul>
+                </small>
+              </p>
+            </td>
+            <td>
+              ${r.vicinity}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</template>
